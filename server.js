@@ -27,9 +27,11 @@ lti.setup(
 );
 
 // ---------------------------------------------------------------------------
-// 2. Mount Eleventy-built static site (protected by LTI session)
-//    After a successful LTI launch, onConnect redirects here.
+// 2. Whitelist /book/* so the textbook is readable without an LTI session.
+//    Only /api/grade requires a valid session (needs the Moodle token anyway).
 // ---------------------------------------------------------------------------
+lti.whitelist({ route: new RegExp(/^\/book/), method: "get" });
+
 const siteDir = path.join(__dirname, "_site");
 lti.app.use("/book", require("express").static(siteDir));
 
