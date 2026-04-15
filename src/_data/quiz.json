@@ -1,0 +1,39 @@
+{
+  "title": "Final Quiz",
+  "scoreMaximum": 100,
+  "questions": [
+    {
+      "id": "q1",
+      "text": "What is the main topic of Chapter 1?",
+      "options": [
+        "An overview of the textbook",
+        "Advanced mathematics",
+        "Computer networking",
+        "History of science"
+      ],
+      "correct": 0
+    },
+    {
+      "id": "q2",
+      "text": "Which of the following is a valid Markdown heading?",
+      "options": [
+        "<h1>Heading</h1>",
+        "## Heading",
+        "**Heading**",
+        "//Heading"
+      ],
+      "correct": 1
+    },
+    {
+      "id": "q3",
+      "text": "What does LTI stand for?",
+      "options": [
+        "Learning Tool Interoperability",
+        "Linked Text Interface",
+        "Local Terminal Integration",
+        "Lightweight Task Interpreter"
+      ],
+      "correct": 0
+    }
+  ]
+}

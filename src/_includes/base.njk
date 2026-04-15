@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ title }} — {{ site.title }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/book/css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <a class="site-title" href="/book/">{{ site.title }}</a>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar" aria-label="Chapters">
+      <p class="sidebar-label">Contents</p>
+      <ol>
+        {% for chapter in collections.chapters %}
+          <li>
+            <a
+              href="{{ chapter.url }}"
+              {% if page.url == chapter.url %}aria-current="page"{% endif %}
+            >{{ chapter.data.title }}</a>
+          </li>
+        {% endfor %}
+      </ol>
+      <hr />
+      <a href="/book/quiz/">Quiz &amp; Grades</a>
+    </nav>
+
+    <main class="content" id="main-content">
+      {{ content | safe }}
+    </main>
+  </div>
+
+  <footer class="site-footer">
+    <p>{{ site.author }} &mdash; served via LTI 1.3</p>
+  </footer>
+</body>
+</html>

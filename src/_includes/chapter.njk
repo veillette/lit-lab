@@ -1,0 +1,32 @@
+---
+layout: base.njk
+---
+
+<article class="chapter">
+  <h1>{{ title }}</h1>
+
+  {{ content | safe }}
+
+  {# ---- Chapter navigation ---- #}
+  {% set chapList = collections.chapters %}
+  {% set currentIdx = null %}
+  {% for ch in chapList %}
+    {% if ch.url == page.url %}
+      {% set currentIdx = loop.index0 %}
+    {% endif %}
+  {% endfor %}
+
+  <nav class="chapter-nav" aria-label="Chapter navigation">
+    {% if currentIdx > 0 %}
+      {% set prev = chapList[currentIdx - 1] %}
+      <a class="nav-prev" href="{{ prev.url }}">&larr; {{ prev.data.title }}</a>
+    {% endif %}
+
+    {% if currentIdx < chapList.length - 1 %}
+      {% set next = chapList[currentIdx + 1] %}
+      <a class="nav-next" href="{{ next.url }}">{{ next.data.title }} &rarr;</a>
+    {% else %}
+      <a class="nav-next" href="/book/quiz/">Take the Quiz &rarr;</a>
+    {% endif %}
+  </nav>
+</article>

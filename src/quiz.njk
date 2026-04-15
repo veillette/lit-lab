@@ -1,0 +1,50 @@
+---
+layout: base.njk
+title: Final Quiz
+permalink: /quiz/index.html
+---
+
+<article class="chapter">
+  <h1>{{ quiz.title }}</h1>
+  <p>Answer all questions and click <strong>Submit</strong>. Your grade will be sent
+  automatically to Moodle.</p>
+
+  <form id="quiz-form" novalidate>
+    {% for q in quiz.questions %}
+      <fieldset class="question" id="fieldset-{{ q.id }}">
+        <legend>
+          <span class="q-num">{{ loop.index }}.</span> {{ q.text }}
+        </legend>
+
+        {% for option in q.options %}
+          <label class="option">
+            <input
+              type="radio"
+              name="{{ q.id }}"
+              value="{{ loop.index0 }}"
+              data-correct="{{ q.correct }}"
+              required
+            />
+            {{ option }}
+          </label>
+        {% endfor %}
+
+        <p class="q-feedback" aria-live="polite"></p>
+      </fieldset>
+    {% endfor %}
+
+    <button type="submit" class="btn-submit">Submit Quiz</button>
+  </form>
+
+  <div id="quiz-result" hidden>
+    <h2>Your Result</h2>
+    <p id="result-text"></p>
+    <p id="grade-status"></p>
+  </div>
+</article>
+
+<script>
+  // Bake the quiz data into the page so quiz.js can use it without an extra fetch.
+  window.QUIZ_SCORE_MAXIMUM = {{ quiz.scoreMaximum }};
+</script>
+<script src="/book/js/quiz.js"></script>

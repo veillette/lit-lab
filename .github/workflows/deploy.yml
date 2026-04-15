@@ -1,0 +1,59 @@
+name: Build & Deploy to Cloud Run
+
+on:
+  push:
+    branches: [main]
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION:     ${{ secrets.GCP_REGION }}        # e.g. us-central1
+  SERVICE:    ${{ secrets.GCP_SERVICE_NAME }}  # e.g. lit-lab
+  IMAGE:      gcr.io/${{ secrets.GCP_PROJECT_ID }}/lit-lab
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write   # needed for Workload Identity Federation
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Authenticate to Google Cloud using Workload Identity Federation (no JSON key)
+      # Setup guide: https://github.com/google-github-actions/auth#setup
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker --quiet
+
+      - name: Build Docker image
+        run: docker build -t $IMAGE:${{ github.sha }} -t $IMAGE:latest .
+
+      - name: Push Docker image
+        run: |
+          docker push $IMAGE:${{ github.sha }}
+          docker push $IMAGE:latest
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy $SERVICE \
+            --image $IMAGE:${{ github.sha }} \
+            --region $REGION \
+            --platform managed \
+            --allow-unauthenticated \
+            --set-env-vars NODE_ENV=production \
+            --set-secrets LTI_KEY=LTI_KEY:latest,MONGODB_URL=MONGODB_URL:latest \
+            --quiet
+
+      - name: Print service URL
+        run: |
+          gcloud run services describe $SERVICE \
+            --region $REGION \
+            --format "value(status.url)"

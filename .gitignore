@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Eleventy build output
+_site/
+
+# Environment secrets
+.env
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+*.swp
