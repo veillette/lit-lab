@@ -58,7 +58,8 @@ function cookie(name, value, maxAgeSeconds) {
 }
 
 // ---- Responses ------------------------------------------------------------
-function deny(status = 401) {
+function deny(reason, status = 401) {
+  console.warn(`Denied (${status}): ${reason}`);
   return new Response(
     "<!doctype html><meta charset=utf-8><title>Access restricted</title>" +
       '<p style="font-family:sans-serif;margin:3rem auto;max-width:32rem">' +
@@ -84,8 +85,10 @@ async function login(request, env) {
   const url = new URL(request.url);
   const params = { ...Object.fromEntries(url.searchParams), ...(await formParams(request)) };
 
-  if (params.iss !== moodleUrl(env)) return deny(400);
-  if (params.client_id && params.client_id !== env.CLIENT_ID) return deny(400);
+  if (params.iss !== moodleUrl(env)) return deny(`login: unexpected iss "${params.iss}"`, 400);
+  if (params.client_id && params.client_id !== env.CLIENT_ID) {
+    return deny(`login: unexpected client_id "${params.client_id}"`, 400);
+  }
 
   const state = crypto.randomUUID();
   const nonce = crypto.randomUUID();
@@ -114,7 +117,8 @@ async function login(request, env) {
 async function launch(request, env) {
   const form = await formParams(request);
   const saved = await verify(env, getCookie(request, "lti_state"));
-  if (!saved || saved.state !== form.state) return deny();
+  if (!saved) return deny("launch: missing or expired lti_state cookie");
+  if (saved.state !== form.state) return deny("launch: state mismatch");
 
   let claims;
   try {
@@ -123,16 +127,15 @@ async function launch(request, env) {
       audience: env.CLIENT_ID,
     }));
   } catch (err) {
-    console.warn("Launch rejected:", err.message);
-    return deny();
+    return deny(`launch: id_token invalid (${err.message})`);
   }
 
-  if (
-    claims.nonce !== saved.nonce ||
-    claims[`${LTI}message_type`] !== "LtiResourceLinkRequest" ||
-    (env.DEPLOYMENT_ID && claims[`${LTI}deployment_id`] !== env.DEPLOYMENT_ID)
-  ) {
-    return deny();
+  if (claims.nonce !== saved.nonce) return deny("launch: nonce mismatch");
+  if (claims[`${LTI}message_type`] !== "LtiResourceLinkRequest") {
+    return deny(`launch: unexpected message_type "${claims[`${LTI}message_type`]}"`);
+  }
+  if (env.DEPLOYMENT_ID && claims[`${LTI}deployment_id`] !== env.DEPLOYMENT_ID) {
+    return deny(`launch: unexpected deployment_id "${claims[`${LTI}deployment_id`]}"`);
   }
 
   const session = await sign(env, { sub: claims.sub, name: claims.name ?? "" }, `${SESSION_HOURS}h`);
@@ -151,7 +154,9 @@ async function route(request, env) {
   if (pathname === "/") return redirect("/book/");
 
   if (pathname === "/book" || pathname.startsWith("/book/")) {
-    if (!(await verify(env, getCookie(request, "session")))) return deny();
+    if (!(await verify(env, getCookie(request, "session")))) {
+      return deny(`book: no valid session cookie (${pathname})`);
+    }
     return env.ASSETS.fetch(request);
   }
 
