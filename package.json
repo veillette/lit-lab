@@ -12,10 +12,10 @@
     "jose": "^6.2.12"
   },
   "devDependencies": {
-    "@11ty/eleventy": "^3.1.6",
+    "@11ty/eleventy": "4.0.0-alpha.10",
     "wrangler": "^4.146.0"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.15.0"
   }
 }
