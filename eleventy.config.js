@@ -15,11 +15,11 @@ module.exports = function (eleventyConfig) {
   );
 
   return {
-    // The server mounts _site at /book; the `url` filter adds this prefix
+    // The book lives under /book; the `url` filter adds this prefix
     pathPrefix: "/book/",
     dir: {
       input: "src",
-      output: "_site",
+      output: "_site/book",
       includes: "_includes",
       data: "_data",
     },

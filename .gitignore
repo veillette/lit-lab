@@ -6,6 +6,10 @@ _site/
 
 # Environment secrets
 .env
+.dev.vars
+
+# Wrangler local state
+.wrangler/
 
 # OS / editor
 .DS_Store
