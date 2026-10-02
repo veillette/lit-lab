@@ -10,11 +10,11 @@
     href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500&display=swap"
     rel="stylesheet"
   />
-  <link rel="stylesheet" href="/book/css/style.css" />
+  <link rel="stylesheet" href="{{ '/css/style.css' | url }}" />
 </head>
 <body>
   <header class="site-header">
-    <a class="site-title" href="/book/">{{ site.title }}</a>
+    <a class="site-title" href="{{ '/' | url }}">{{ site.title }}</a>
   </header>
 
   <div class="layout">

@@ -1,6 +1,5 @@
 {
   "title": "Lit Lab Textbook",
   "description": "A private textbook for students of the course.",
-  "author": "Your Name",
-  "baseUrl": "/book"
+  "author": "Your Name"
 }
