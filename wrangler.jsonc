@@ -13,8 +13,8 @@
   // Not secret — fill these in from Moodle's External Tool page.
   // SESSION_SECRET is set separately: npx wrangler secret put SESSION_SECRET
   "vars": {
-    "MOODLE_URL": "https://moodle.example.com",
-    "CLIENT_ID": "",
-    "DEPLOYMENT_ID": ""
+    "MOODLE_URL": "https://moodle.berea.edu",
+    "CLIENT_ID": "pCc4bLahM4xopg7",
+    "DEPLOYMENT_ID": "396"
   }
 }
