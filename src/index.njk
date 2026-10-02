@@ -10,15 +10,11 @@ title: Table of Contents
   <ol class="toc">
     {% for chapter in collections.chapters %}
       <li>
-        <a href="{{ chapter.url }}">{{ chapter.data.title }}</a>
+        <a href="{{ chapter.url | url }}">{{ chapter.data.title }}</a>
         {% if chapter.data.summary %}
           <p class="toc-summary">{{ chapter.data.summary }}</p>
         {% endif %}
       </li>
     {% endfor %}
-    <li>
-      <a href="/book/quiz/">Final Quiz</a>
-      <p class="toc-summary">Test your understanding and submit your grade to Moodle.</p>
-    </li>
   </ol>
 </article>

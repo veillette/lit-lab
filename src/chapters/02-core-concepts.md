@@ -1,7 +1,7 @@
 ---
 layout: chapter.njk
 title: Core Concepts
-summary: The fundamental ideas you need before taking the quiz.
+summary: The fundamental ideas the rest of the book builds on.
 ---
 
 ## Concept A

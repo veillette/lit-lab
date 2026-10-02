@@ -19,14 +19,12 @@ layout: base.njk
   <nav class="chapter-nav" aria-label="Chapter navigation">
     {% if currentIdx > 0 %}
       {% set prev = chapList[currentIdx - 1] %}
-      <a class="nav-prev" href="{{ prev.url }}">&larr; {{ prev.data.title }}</a>
+      <a class="nav-prev" href="{{ prev.url | url }}">&larr; {{ prev.data.title }}</a>
     {% endif %}
 
     {% if currentIdx < chapList.length - 1 %}
       {% set next = chapList[currentIdx + 1] %}
-      <a class="nav-next" href="{{ next.url }}">{{ next.data.title }} &rarr;</a>
-    {% else %}
-      <a class="nav-next" href="/book/quiz/">Take the Quiz &rarr;</a>
+      <a class="nav-next" href="{{ next.url | url }}">{{ next.data.title }} &rarr;</a>
     {% endif %}
   </nav>
 </article>

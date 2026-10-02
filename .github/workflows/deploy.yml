@@ -48,8 +48,8 @@ jobs:
             --region $REGION \
             --platform managed \
             --allow-unauthenticated \
-            --set-env-vars NODE_ENV=production \
-            --set-secrets LTI_KEY=LTI_KEY:latest,MONGODB_URL=MONGODB_URL:latest \
+            --set-env-vars NODE_ENV=production,MOODLE_URL=${{ vars.MOODLE_URL }},CLIENT_ID=${{ vars.CLIENT_ID }},DEPLOYMENT_ID=${{ vars.DEPLOYMENT_ID }},TOOL_URL=${{ vars.TOOL_URL }} \
+            --set-secrets SESSION_SECRET=SESSION_SECRET:latest \
             --quiet
 
       - name: Print service URL

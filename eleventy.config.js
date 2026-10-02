@@ -1,6 +1,6 @@
 module.exports = function (eleventyConfig) {
-  // Copy static assets straight through to _site/
-  eleventyConfig.addPassthroughCopy("public");
+  // Copy static assets to the root of _site/ (public/css → _site/css)
+  eleventyConfig.addPassthroughCopy({ public: "." });
 
   // Add a filter to format chapter numbers
   eleventyConfig.addFilter("padStart", (val, len, fill) =>
@@ -15,6 +15,8 @@ module.exports = function (eleventyConfig) {
   );
 
   return {
+    // The server mounts _site at /book; the `url` filter adds this prefix
+    pathPrefix: "/book/",
     dir: {
       input: "src",
       output: "_site",

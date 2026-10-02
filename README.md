@@ -1,37 +1,32 @@
-# Lit Lab — LTI 1.3 Interactive Textbook
+# Lit Lab — Private Textbook for a Moodle Course
 
-An open textbook that launches from **Moodle** via LTI 1.3, built with
-**Eleventy (11ty)** for content authoring and **LTIJS** for the LTI handshake and
-grade passback.
+A textbook written in Markdown with **Eleventy (11ty)**, served by a tiny Express
+server that only lets in students who launch it from **Moodle** (LTI 1.3).
+No database, no quizzes, no grades.
 
-## Stack
+## How access works
 
-| Layer | Technology |
-|---|---|
-| Content authoring | Eleventy (11ty) — Markdown + Nunjucks |
-| LTI 1.3 | [LTIJS](https://cvmcosta.me/ltijs/) |
-| Database | MongoDB Atlas (free M0 tier) |
-| Hosting | Google Cloud Run (free tier) |
-| CI/CD | GitHub Actions |
+1. A student clicks the textbook activity in the Moodle course.
+2. Moodle performs an LTI 1.3 launch: `/login` → Moodle → `POST /launch` with a signed token.
+3. The server verifies the token against Moodle's public keys and sets a
+   signed session cookie (valid 12 h).
+4. Everything under `/book/` requires that cookie. Anyone else sees
+   "Please open this textbook from your Moodle course."
+
+Only people who can see the activity in Moodle can launch it, so access is
+controlled by course enrolment in Moodle.
 
 ## Project layout
 
 ```
 lit-lab/
-├── src/                    ← Eleventy source (Markdown chapters, templates)
-│   ├── _includes/          ← Nunjucks layouts
-│   ├── _data/              ← site.json, quiz.json
-│   ├── chapters/           ← One .md file per chapter
-│   ├── index.njk           ← Table of contents
-│   └── quiz.njk            ← Quiz page
-├── public/                 ← Static assets copied as-is
-│   ├── css/style.css
-│   └── js/quiz.js
-├── server/
-│   └── routes/grade.js     ← Grade passback API (/api/grade)
-├── scripts/
-│   └── register-platform.js ← One-time Moodle registration
-├── server.js               ← LTIJS setup + Express routes
+├── src/                 ← Eleventy source
+│   ├── _includes/       ← Nunjucks layouts
+│   ├── _data/site.json  ← title, description, author
+│   ├── chapters/        ← one .md file per chapter
+│   └── index.njk        ← table of contents
+├── public/css/          ← static assets (copied to _site/)
+├── server.js            ← LTI gate + static file server
 ├── eleventy.config.js
 ├── Dockerfile
 └── .github/workflows/deploy.yml
@@ -39,101 +34,63 @@ lit-lab/
 
 ## Local development
 
-### Prerequisites
-- Node.js >= 18
-- A running MongoDB instance (or a free Atlas M0 cluster)
-
 ```bash
-# 1. Install dependencies
 npm install
-
-# 2. Copy and fill in the env file
-cp .env.example .env
-# edit .env — set LTI_KEY and MONGODB_URL at minimum
-
-# 3. Build + watch Eleventy, start the server with auto-reload
 npm run dev
 ```
 
-The server runs at http://localhost:3000.
-The textbook (after an LTI launch) is at http://localhost:3000/book/.
-
-Dev mode note: In development LTIJS uses devMode: true, which skips HTTPS
-and relaxes cookie requirements. To test a full LTI flow locally use
-ngrok to expose your local port over HTTPS.
-
-## Moodle setup (one time per instance)
-
-### 1. Create an External Tool in Moodle
-
-Site Administration > Plugins > Activity modules > External tool >
-Manage tools > Configure a tool manually:
-
-| Field | Value |
-|---|---|
-| Tool URL | https://YOUR_CLOUD_RUN_URL/ |
-| LTI version | LTI 1.3 |
-| Public key type | Keyset URL |
-| Public keyset URL | https://YOUR_CLOUD_RUN_URL/keys |
-| Initiate login URL | https://YOUR_CLOUD_RUN_URL/login |
-| Redirection URI | https://YOUR_CLOUD_RUN_URL/ |
-| Supports Deep Linking | No |
-| Grading | Enabled (required for grade passback) |
-
-Save — Moodle displays a Client ID. Copy it.
-
-### 2. Register Moodle with LTIJS
-
-```bash
-MOODLE_URL=https://moodle.example.com \
-MOODLE_CLIENT_ID=paste_client_id_here \
-npm run register-platform
-```
-
-Run this once. The registration persists in MongoDB across restarts.
-
-## Deployment (Google Cloud Run)
-
-### Required GitHub Secrets
-
-| Secret | Description |
-|---|---|
-| GCP_PROJECT_ID | Your GCP project ID |
-| GCP_REGION | Cloud Run region, e.g. us-central1 |
-| GCP_SERVICE_NAME | Cloud Run service name, e.g. lit-lab |
-| GCP_WORKLOAD_IDENTITY_PROVIDER | WIF provider resource name |
-| GCP_SERVICE_ACCOUNT | Service account email for deployments |
-
-### Required GCP Secret Manager secrets
-
-Store LTI_KEY and MONGODB_URL in GCP Secret Manager.
-The deploy workflow injects them via --set-secrets.
-
-Push to main — GitHub Actions builds the Docker image, pushes to GCR,
-and redeploys Cloud Run automatically.
+Open http://localhost:3000/book/. In development (`NODE_ENV` ≠ `production`)
+the access gate is **disabled**, so you can edit content without Moodle.
 
 ## Adding content
 
-Create src/chapters/03-new-topic.md with frontmatter:
+Create `src/chapters/03-new-topic.md`:
 
 ```markdown
 ---
 layout: chapter.njk
 title: New Topic
-summary: One-line description for the TOC.
+summary: One-line description for the table of contents.
 ---
 
 Your Markdown content here.
 ```
 
-Push to main — CI/CD rebuilds and redeploys.
+Chapters are ordered by filename. Push to `main` to redeploy.
 
-## Editing the quiz
+## Moodle setup (one time)
 
-Edit src/_data/quiz.json. Each question needs:
-- id — unique string
-- text — the question
-- options — array of answer strings
-- correct — zero-based index of the correct answer
+In the course (or Site administration → Plugins → Activity modules →
+External tool → Manage tools), configure a tool manually:
 
-Scores post to Moodle automatically on quiz submission via LTI AGS.
+| Field | Value |
+|---|---|
+| Tool URL | `https://TOOL_URL/launch` |
+| LTI version | LTI 1.3 |
+| Public key type | Not used — leave blank, or paste any RSA public key if Moodle insists |
+| Initiate login URL | `https://TOOL_URL/login` |
+| Redirection URI(s) | `https://TOOL_URL/launch` |
+| Default launch container | **New window** (browsers block cookies inside Moodle's iframe) |
+| Services / grades / deep linking | Off |
+
+After saving, Moodle shows a **Client ID** and **Deployment ID** — put them in
+the configuration below. Then add the tool as an activity in your course.
+
+## Configuration
+
+| Variable | Description |
+|---|---|
+| `MOODLE_URL` | e.g. `https://moodle.example.com` |
+| `CLIENT_ID` | Client ID from the Moodle tool |
+| `DEPLOYMENT_ID` | Deployment ID from the Moodle tool (optional, recommended) |
+| `TOOL_URL` | Public URL of this app, e.g. the Cloud Run URL |
+| `SESSION_SECRET` | Random string ≥ 32 chars (`openssl rand -hex 32`) |
+
+## Deployment (Google Cloud Run)
+
+Push to `main`; GitHub Actions builds the Docker image and deploys it.
+
+- **GitHub secrets:** `GCP_PROJECT_ID`, `GCP_REGION`, `GCP_SERVICE_NAME`,
+  `GCP_WORKLOAD_IDENTITY_PROVIDER`, `GCP_SERVICE_ACCOUNT`
+- **GitHub variables:** `MOODLE_URL`, `CLIENT_ID`, `DEPLOYMENT_ID`, `TOOL_URL`
+- **GCP Secret Manager:** `SESSION_SECRET`

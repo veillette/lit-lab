@@ -18,8 +18,7 @@ standard Markdown syntax including:
 ## How to navigate
 
 Use the sidebar on the left to jump between chapters, or use the **Previous / Next**
-links at the bottom of each page. After the last chapter you will be taken to the
-quiz, where your score is automatically sent back to Moodle.
+links at the bottom of each page.
 
 ## Learning objectives
 
@@ -27,4 +26,4 @@ By the end of this textbook you should be able to:
 
 1. Understand the core concepts introduced in Chapter 2.
 2. Apply those concepts to solve basic problems.
-3. Demonstrate your understanding in the final quiz.
+3. Connect the ideas from each chapter into a coherent whole.

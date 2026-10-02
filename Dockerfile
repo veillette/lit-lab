@@ -19,7 +19,6 @@ RUN npm ci --omit=dev
 
 # Copy only what the server needs at runtime
 COPY server.js ./
-COPY server/ ./server/
 COPY --from=builder /app/_site ./_site
 
 ENV NODE_ENV=production
