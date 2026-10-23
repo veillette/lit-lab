@@ -9,11 +9,11 @@
     "deploy": "eleventy && wrangler deploy"
   },
   "dependencies": {
-    "jose": "^6.2.12"
+    "jose": "^6.2.13"
   },
   "devDependencies": {
     "@11ty/eleventy": "4.0.0-alpha.10",
-    "wrangler": "^4.147.0"
+    "wrangler": "^4.151.2"
   },
   "engines": {
     "node": ">=22.15.0"
